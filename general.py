@@ -74,3 +74,24 @@ def sphere_to_joints(spheres):
     return torch.stack(jointss)
 
 
+
+
+def get_NYU_compatible_joints(mesh_verts,joints,selected_joints=[20,18,16,14,12,10,8,6,4,3],selected_verts=[[231,7] ,[44,85], [37,190],67]):#[44,37,67]):
+    # mesh verts and joints of of size (m,3) and (n,3) respectively
+    final=joints[:,selected_joints]
+    batch_size=mesh_verts.shape[0]
+    for element in selected_verts:
+        if type(element)==int:
+            temp=mesh_verts[:,element].reshape(batch_size,1,3)
+        else:
+            temp=(mesh_verts[:,element[0]].reshape(batch_size,1,3)+mesh_verts[:,element[1]].reshape(batch_size,1,3))/2
+            
+        final=torch.cat([final,temp],dim=1)
+    return final 
+
+
+
+
+
+
+
