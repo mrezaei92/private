@@ -51,5 +51,26 @@ def compute_Spheres(mesh_v,H_joints):
     Radius=torch.tensor(RAD).reshape(-1,1)
     return spheres,Radius
   
-  
-  
+    
+    
+    
+def sphere_to_joints(spheres):
+    # spheres is a tensor of shape (n,3)
+    # the output will be a tensor of shape (m,3)
+    jointss=[]
+    p=[28,[24,27],22,[18,21],16,[12,15],10,[6,8],4,2,0,40,[38,39],[31,36]]
+    for i in range(len(p)):
+        if type(p[i])!=type([1]):
+            jointss.append(spheres[p[i]])
+        else:
+            n=0;
+            summ=p[i][0];
+            for j in range(len(p[i])):
+                n=n+1;
+                summ=summ+spheres[p[i][j]]
+                
+            summ=summ-p[i][0]
+            jointss.append(summ/n)
+    return torch.stack(jointss)
+
+
