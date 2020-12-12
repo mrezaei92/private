@@ -90,8 +90,15 @@ def get_NYU_compatible_joints(mesh_verts,joints,selected_joints=[20,18,16,14,12,
     return final 
 
 
+##################################
+with open('Regressor_sphereToNYUjoints.pickle', 'rb') as f:
+    Regressor = pickle.load(f)
 
+def batch_sphere_to_joints2(spheres_batch,weights):
+    # spheres is a tensor of shape (batch,n,3)
+    # the output will be a tensor of shape (batch,m,3)
 
-
+    return torch.matmul(weights.double(),spheres_batch.double())
+#####################################
 
 
