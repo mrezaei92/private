@@ -401,3 +401,16 @@ def get_fingers(heatmpas,groups=[[0,1,2,3,4], [5,6,7,8,9], [10,11,12,13,14], [15
     for g in range(len(groups)):
         output[g,...]=np.max(heatmpas[groups[g]],axis=0)
     return output
+
+
+def show_tensor_images(image_tensor, num_images=25, size=(1, 28, 28)):
+    from torchvision.utils import make_grid
+    '''
+    Function for visualizing images: Given a tensor of images, number of images, and
+    size per image, plots and prints the images in an uniform grid.
+    '''
+    image_tensor = (image_tensor + 1) / 2
+    image_unflat = image_tensor.detach().cpu()
+    image_grid = make_grid(image_unflat[:num_images], nrow=5)
+    plt.imshow(image_grid.permute(1, 2, 0).squeeze())
+    plt.show()
