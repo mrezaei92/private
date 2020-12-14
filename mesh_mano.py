@@ -91,7 +91,7 @@ def get_NYU_compatible_joints(mesh_verts,joints,selected_joints=[20,18,16,14,12,
 
 
 ##################################
-with open('Regressor_sphereToNYUjoints.pickle', 'rb') as f:
+with open('tools_ess/Regressor_sphereToNYUjoints.pickle', 'rb') as f:
     Regressor = pickle.load(f)
 
 def batch_sphere_to_joints2(spheres_batch,weights):
