@@ -102,3 +102,87 @@ def batch_sphere_to_joints2(spheres_batch,weights):
 #####################################
 
 
+
+
+def from_AtoBIV(a,b,ratio=1):
+    # a and b: each a tensor of size (3)
+    # this function returns a rotation matrix R such that a*R will align with b if ratio=1
+    # basically rotates the a by theta*ratio degree, where theta is the angle between a and b
+    normal=torch.cross(a,b)/torch.norm(torch.cross(a,b))
+    normal=normal.view(1,3)
+    cos0=torch.dot(a,b)/(torch.norm(a)*torch.norm(b))
+    
+    theta=np.arccos(cos0-1e-6)*ratio#+np.pi#+1*np.pi
+    R=batch_rodrigues(theta*normal).view(3,3)
+    return torch.transpose(R,0,1),-theta*normal
+
+
+def Inverse_Kinematic(Joints,pca_use=False,ncomps=6,address="mano/models/MANO_RIGHT.pkl",flat_hand_mean=True):
+    # Joints is a tensor of size (k,3)
+    # Joints should be in the original order
+    
+    data = pickle.load(open(address, 'rb'), encoding='latin1')
+    restPose=torch.from_numpy(data["J"]*1000).float()
+    
+    lev1_idxs = [1, 4, 7, 10, 13]
+    lev2_idxs = [2, 5, 8, 11, 14]
+    lev3_idxs = [3, 6, 9, 12, 15]
+    levels=[lev1_idxs,lev2_idxs,lev3_idxs]
+    
+    # compute the root rotation matrix and axis-angle
+    As=[]
+    Bs=[]
+    for g in lev1_idxs:
+        a=(restPose[g]-restPose[0])
+        b=hand_joints[0,g]-hand_joints[0,0]
+        As.append(a)
+        Bs.append(b)
+
+    A=torch.cat([As[0],As[1],As[2]]).view(3,3)
+
+    R=[]
+    for i in range(3):
+        B=torch.stack([Bs[0][i],Bs[1][i],Bs[2][i]]).view(3,1)
+        r=torch.inverse(A)@B
+        R.append(r)
+
+    R_root=torch.stack(R).view(3,3)
+    ax_root=torch.from_numpy(Rotation.from_matrix(R_root).as_rotvec())
+
+    my_pose=torch.zeros(15,3)
+    my_R=torch.zeros(1,15,3,3)
+    R_accum=torch.stack([torch.eye(3) for i in range(16)])
+    R_accum[lev1_idxs]=R_root
+
+    for lvl in range(2):
+            parents_lvl=levels[lvl]
+            children_lvl=levels[lvl+1]
+            for i in range(5):
+                vec1=restPose[children_lvl[i]]-restPose[parents_lvl[i]]
+                vec2=Joints[children_lvl[i]]-Joints[parents_lvl[i]]
+#                 R,axs2=from_AtoBIV(vec2,R_accum[parents_lvl[i]]@vec1)
+                R,axs2=from_AtoBIV(R_accum[parents_lvl[i]].T@vec2,vec1)
+
+                
+                my_R[0,parents_lvl[i]-1]=R
+                R_accum[children_lvl[i]]=R_accum[parents_lvl[i]]@R
+                my_pose[parents_lvl[i]-1,:]=axs2
+      
+        
+    my_pose=my_pose.view(1,-1)
+    
+    if pca_use:
+        hands_components=torch.from_numpy(data["hands_components"]).float()
+        hands_mean = np.zeros(hands_components.shape[1]) if flat_hand_mean else data['hands_mean']
+        hands_mean = torch.Tensor(hands_mean).unsqueeze(0).float()
+        selected_components = hands_components[:ncomps]
+        my_pose=(selected_components@(my_pose-hands_mean).T).T #(1,k)
+        
+
+        
+    pose=torch.cat([ax_root.view(1,-1),my_pose],dim=1)
+    return pose
+
+
+# from_AtoBIV(b,a)
+# r@a=b
