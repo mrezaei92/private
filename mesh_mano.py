@@ -136,7 +136,7 @@ def Inverse_Kinematic(Joints,pca_use=False,ncomps=6,address="mano/models/MANO_RI
     Bs=[]
     for g in lev1_idxs:
         a=(restPose[g]-restPose[0])
-        b=hand_joints[0,g]-hand_joints[0,0]
+        b=Joints[g]-Joints[0]
         As.append(a)
         Bs.append(b)
 
