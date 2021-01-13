@@ -161,12 +161,12 @@ def from_AtoBIV(a,b,ratio=1):
     return torch.transpose(R,0,1),-theta*normal
 
 
-def Inverse_Kinematic(Joints,pca_use=False,ncomps=6,address="mano/models/MANO_RIGHT.pkl",flat_hand_mean=True):
+def Inverse_Kinematic(Joints,scale=1,pca_use=False,ncomps=6,address="mano/models/MANO_RIGHT.pkl",flat_hand_mean=True):
     # Joints is a tensor of size (k,3)
     # Joints should be in the original order
     
     data = pickle.load(open(address, 'rb'), encoding='latin1')
-    restPose=torch.from_numpy(data["J"]*1000).float()
+    restPose=torch.from_numpy(data["J"]*1000*scale).float()
     
     lev1_idxs = [1, 4, 7, 10, 13]
     lev2_idxs = [2, 5, 8, 11, 14]
