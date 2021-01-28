@@ -414,3 +414,13 @@ def show_tensor_images(image_tensor, num_images=25, size=(1, 28, 28)):
     image_grid = make_grid(image_unflat[:num_images], nrow=5)
     plt.imshow(image_grid.permute(1, 2, 0).squeeze())
     plt.show()
+
+ def compute_entropy(x):
+    # x is a tensor of size (b,k,dim1,dim2)
+    # each map of size (dim1,dim2) should be a probability map (their value sum up to one)
+    
+    x=x.view(x.shape[0],x.shape[1],-1)
+    logs=torch.log(x)
+    return torch.sum(-1*x*logs,dim=-1)
+
+
