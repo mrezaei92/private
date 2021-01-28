@@ -118,6 +118,16 @@ def sphere_to_joints(spheres):
     return torch.stack(jointss)
 
 
+def batch_sphere_to_joints(spheres_batch):
+    # spheres is a tensor of shape (batch,n,3)
+    # the output will be a tensor of shape (batch,m,3)
+    num_batch=spheres_batch.shape[0]
+    result=[]
+    result.append(sphere_to_joints(spheres_batch[0]))
+    for i in range(1,num_batch):
+        result.append(sphere_to_joints(spheres_batch[i]))
+
+    return torch.stack(result)
 
 
 def get_NYU_compatible_joints(mesh_verts,joints,selected_joints=[20,18,16,14,12,10,8,6,4,3],selected_verts=[[231,7] ,[44,85], [37,190],67]):#[44,37,67]):
