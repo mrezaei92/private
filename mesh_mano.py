@@ -130,17 +130,18 @@ def batch_sphere_to_joints(spheres_batch):
     return torch.stack(result)
 
 
-def get_NYU_compatible_joints(mesh_verts,joints,selected_joints=[20,18,16,14,12,10,8,6,4,3],selected_verts=[[231,7] ,[44,85], [37,190],67]):#[44,37,67]):
+def get_NYU_compatible_joints(mesh_verts,joints,selected_joints=[18,14,10,6,3],selected_verts=[[683,654],[534,566],[439,423],[311,329],[724,738],[231,7] ,[44,85], [37,190],[67,17]]):#[44,37,67]):
     # mesh verts and joints of of size (m,3) and (n,3) respectively
+    places=[5,0,6,1,7,2,8,3,9,4, 10, 11, 12, 13]
     final=joints[:,selected_joints]
-    batch_size=mesh_verts.shape[0]
     for element in selected_verts:
         if type(element)==int:
-            temp=mesh_verts[:,element].reshape(batch_size,1,3)
+            temp=mesh_verts[:,element].reshape(-1,1,3)
         else:
-            temp=(mesh_verts[:,element[0]].reshape(batch_size,1,3)+mesh_verts[:,element[1]].reshape(batch_size,1,3))/2
+            temp=(mesh_verts[:,element[0]].reshape(-1,1,3)+mesh_verts[:,element[1]].reshape(-1,1,3))/2
             
         final=torch.cat([final,temp],dim=1)
+    final=final[:,places]
     return final 
 
 
