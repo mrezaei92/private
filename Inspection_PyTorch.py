@@ -13,3 +13,10 @@ def compare(state_dic1,state_dic2):
             
     print("Num tensors unchanged: ", c)
     return keys
+
+
+def count_parameters(model):
+    # counts the number of learned parameter in the model (in Millions)
+    # the model is of type nn.Module
+    params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    return params/1000000
