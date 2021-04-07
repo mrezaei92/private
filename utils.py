@@ -425,3 +425,10 @@ def compute_entropy(x):
     return torch.sum(-1*x*logs,dim=-1)
 
 
+# Usage: Prepare_Message(a=432,b=432) it will return a message 
+def Prepare_Message(**args):
+    message=""
+    for key in args:
+        message=message+" "+ key +":"+" "+ "%.2f"% args[key] +", "
+        
+    return message
